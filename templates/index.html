@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Review Sentiment Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f3e7 0%, #e8e4d0 100%);
+            min-height: 100vh;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(200, 180, 140, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(200, 180, 140, 0.3) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -1;
+        }
+
+        /* Movie elements scattered around */
+        .movie-element {
+            position: absolute;
+            opacity: 0.6;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .movie-ticket {
+            top: 10%;
+            right: 15%;
+            font-size: 2rem;
+            color: #d4932b;
+            animation-delay: -2s;
+        }
+
+        .film-reel {
+            top: 20%;
+            left: 10%;
+            font-size: 3rem;
+            color: #8b4513;
+            animation-delay: -4s;
+        }
+
+        .popcorn {
+            bottom: 20%;
+            right: 20%;
+            font-size: 2.5rem;
+            animation-delay: -1s;
+        }
+
+        .clapperboard {
+            top: 15%;
+            left: 20%;
+            font-size: 2rem;
+            color: #2c3e50;
+            animation-delay: -3s;
+        }
+
+        .camera {
+            bottom: 30%;
+            left: 15%;
+            font-size: 2.5rem;
+            color: #34495e;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .movie-badge {
+            display: inline-block;
+            background: #c41e3a;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            transform: rotate(-2deg);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .title {
+            font-size: 2.5rem;
+            color: #8b4513;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .search-container {
+            background: #f9f7e8;
+            border: 3px solid #8b4513;
+            border-radius: 25px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .search-container::before {
+            content: '🎬';
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            font-size: 2rem;
+            background: #f9f7e8;
+            padding: 0 10px;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 1.1rem;
+            color: #8b4513;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .movie-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #d4932b;
+            border-radius: 15px;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .movie-input:focus {
+            outline: none;
+            border-color: #c41e3a;
+            box-shadow: 0 0 10px rgba(196, 30, 58, 0.3);
+            transform: scale(1.02);
+        }
+
+        .review-textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, #c41e3a, #e74c3c);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 1rem auto;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(196, 30, 58, 0.3);
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.4);
+        }
+
+        .analyze-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .analyze-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .results-container {
+            background: white;
+            border: 3px solid #8b4513;
+            border-radius: 25px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .results-header {
+            font-size: 1.5rem;
+            color: #8b4513;
+            margin-bottom: 1.5rem;
+            padding: 0.5rem 1rem;
+            background: #f0e68c;
+            border-radius: 15px;
+            display: inline-block;
+        }
+
+        .sentiment-result {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 15px;
+        }
+
+        .sentiment-positive {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .sentiment-negative {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .sentiment-neutral {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .sentiment-emoji {
+            font-size: 3rem;
+            margin: 1rem 0;
+        }
+
+        .movie-title-display {
+            font-size: 1.3rem;
+            color: #8b4513;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .back-btn {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .back-btn:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #8b4513;
+            font-size: 1.2rem;
+            margin: 1rem 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #c41e3a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .fun-facts {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .movie-element {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating movie elements -->
+    <div class="movie-element film-reel">🎞️</div>
+    <div class="movie-element movie-ticket">🎫</div>
+    <div class="movie-element popcorn">🍿</div>
+    <div class="movie-element clapperboard">🎬</div>
+    <div class="movie-element camera">🎥</div>
+
+    <div class="container">
+        <div class="header">
+            <div class="movie-badge">MOVIE</div>
+            <h1 class="title">Review Sentiment Analyzer</h1>
+            <p class="subtitle">Discover if your movie review is positive, negative, or neutral!</p>
+        </div>
+
+        <!-- Home Page -->
+        <div id="homePage" class="page active">
+            <div class="search-container">
+                <div class="input-group">
+                    <label class="input-label" for="movieTitle">🎬 Movie Title:</label>
+                    <input type="text" id="movieTitle" class="movie-input" placeholder="Enter the movie name (e.g., The Avengers, Titanic...)" />
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label" for="movieReview">📝 Write your review:</label>
+                    <textarea id="movieReview" class="movie-input review-textarea" placeholder="Share your thoughts about the movie... Was it amazing? Terrible? Just okay? Tell us what you think!"></textarea>
+                </div>
+                
+                <button id="analyzeBtn" class="analyze-btn">🎭 Analyze My Review</button>
+                
+                <div id="loading" class="loading">
+                    Analyzing your review... <div class="spinner"></div>
+                </div>
+            </div>
+
+            <div class="fun-facts">
+                <strong>🎪 Fun Fact:</strong> Did you know that the first movie review was published in 1906? Our AI can analyze your review in seconds using advanced sentiment analysis!
+            </div>
+        </div>
+
+        <!-- Results Page -->
+        <div id="resultsPage" class="page">
+            <div class="results-container">
+                <div class="results-header">🎭 YOUR REVIEWS</div>
+                
+                <div id="movieTitleDisplay" class="movie-title-display"></div>
+                
+                <div id="sentimentEmoji" class="sentiment-emoji"></div>
+                
+                <div id="sentimentResult" class="sentiment-result">
+                    The given review is <span id="sentimentText"></span>
+                </div>
+                
+                <div id="sentimentExplanation" class="fun-facts"></div>
+                
+                <button id="backBtn" class="back-btn">🏠 Analyze Another Review</button>
+            </div>
+        </div>
+    </div>
+
+ <script>
+    // DOM elements
+    const homePage = document.getElementById('homePage');
+    const resultsPage = document.getElementById('resultsPage');
+    const movieTitleInput = document.getElementById('movieTitle');
+    const movieReviewInput = document.getElementById('movieReview');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const backBtn = document.getElementById('backBtn');
+    const loading = document.getElementById('loading');
+    const movieTitleDisplay = document.getElementById('movieTitleDisplay');
+    const sentimentEmoji = document.getElementById('sentimentEmoji');
+    const sentimentResult = document.getElementById('sentimentResult');
+    const sentimentText = document.getElementById('sentimentText');
+    const sentimentExplanation = document.getElementById('sentimentExplanation');
+
+    // Event listeners
+    analyzeBtn.addEventListener('click', function() {
+        const movieTitle = movieTitleInput.value.trim();
+        const movieReview = movieReviewInput.value.trim();
+
+        if (!movieTitle || !movieReview) {
+            alert('🎬 Please enter both movie title and review!');
+            return;
+        }
+
+        loading.classList.add('show');
+        analyzeBtn.disabled = true;
+
+        fetch('/analyze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                movieTitle: movieTitle,
+                movieReview: movieReview
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayResults(data);
+            homePage.classList.remove('active');
+            resultsPage.classList.add('active');
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+            alert('Sorry, something went wrong. Could not analyze the review.');
+        })
+        .finally(() => {
+            loading.classList.remove('show');
+            analyzeBtn.disabled = false;
+        });
+    });
+
+    backBtn.addEventListener('click', function() {
+        resultsPage.classList.remove('active');
+        homePage.classList.add('active');
+        movieTitleInput.value = '';
+        movieReviewInput.value = '';
+    });
+
+    // --- THIS FUNCTION IS CORRECTED ---
+    function displayResults(data) {
+        // Map the sentiment string from the server to the correct CSS class name
+        const sentimentClassMap = {
+            'Good': 'sentiment-positive',
+            'Bad': 'sentiment-negative',
+            'Neutral': 'sentiment-neutral'
+        };
+
+        // Get the correct CSS class based on the sentiment
+        const resultClassName = sentimentClassMap[data.sentiment] || 'sentiment-neutral';
+
+        // Update all the elements with the data from the server
+        movieTitleDisplay.textContent = `"${data.movieTitle}"`;
+        sentimentEmoji.textContent = data.emoji;
+        
+        // **CRITICAL FIX**: Update the text inside the main result box
+        sentimentText.textContent = data.sentiment; 
+        
+        // **CRITICAL FIX**: Update the class of the main result box
+        // First, remove old classes, then add the new one
+        sentimentResult.className = 'sentiment-result'; // Reset classes
+        sentimentResult.classList.add(resultClassName); // Add the new correct class
+
+        sentimentExplanation.innerHTML = `<strong>📊 Analysis:</strong> ${data.explanation}`;
+    }
+
+    // Add enter key support
+    movieReviewInput.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'Enter') {
+            analyzeBtn.click();
+        }
+    });
+</script>

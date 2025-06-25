@@ -1,0 +1,10 @@
+flask
+flask-cors
+pymongo
+python-dotenv
+tensorflow
+joblib
+scikit-learn
+nltk
+numpy
+gunicorn  # For deployment
