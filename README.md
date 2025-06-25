@@ -7,7 +7,7 @@ The result page:
 ![image](https://github.com/user-attachments/assets/62626cc1-b7ad-4128-be04-3422427426d5)
 
 The link to the website : 
-
+https://ishanyawhocares.github.io/zero_to_one_project/
 
 Link to the ML code :
 https://colab.research.google.com/drive/1XQjZJbKXTM3HWyYzSinxLf5DwYt4048y?usp=sharing
